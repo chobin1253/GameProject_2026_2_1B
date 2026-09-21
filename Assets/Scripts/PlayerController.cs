@@ -1,6 +1,13 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR.Haptics;
+using UnityEngine.UI;
+public enum PlayerState
+{
+    Normal,
+    PickUp,
+}
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,6 +24,7 @@ public class PlayerController : MonoBehaviour
 
     private CharacterController controller;
     private float verticalVelocity;
+    private PlayerState currentState = PlayerState.Normal;
 
     private void Awake()
     {
@@ -38,6 +46,14 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        ApplyGravity();
+
+        if (currentState != PlayerState.Normal) return;
+
+        HandleMovement(keyboard);
+    }
+    private void HandleMovement(Keyboard keyboard)
+    {
         Vector2 input = Vector2.zero;
 
         if (keyboard.aKey.isPressed)
@@ -74,9 +90,9 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        if(controller.isGrounded && verticalVelocity < 0f)
+        if (controller.isGrounded && verticalVelocity < 0f)
         {
-            verticalVelocity = -2f; 
+            verticalVelocity = -2f;
         }
         else
         {
@@ -94,5 +110,31 @@ public class PlayerController : MonoBehaviour
 
         animator.SetFloat("speed", animationSpeed, 0.1f, Time.deltaTime);
 
+    }
+
+    private void ApplyGravity()
+    {
+        if(controller.isGrounded && verticalVelocity < 0f)
+        {
+            verticalVelocity = -2f;
+        }
+        else
+        {
+            verticalVelocity += gravity * Time.deltaTime;
+        }
+
+        controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
+    }
+
+    public void ChangeState(PlayerState newState)
+    {
+        currentState = newState;
+
+        if (currentState != PlayerState.Normal)
+        {
+            animator.SetFloat("speed", 0);
+        }
+
+        Debug.Log("현재 상태 : " + currentState);
     }
 }
