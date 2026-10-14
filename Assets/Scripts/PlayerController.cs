@@ -114,7 +114,7 @@ public class PlayerController : MonoBehaviour
 
     private void ApplyGravity()
     {
-        if(controller.isGrounded && verticalVelocity < 0f)
+        if (controller.isGrounded && verticalVelocity < 0f)
         {
             verticalVelocity = -2f;
         }
